@@ -2,8 +2,13 @@
 FROM centos:7.6.1810 as builder
 
 # Install package for development 
-RUN yum -y groupinstall 'Development tools' && \
-    yum -y install git latex2html texlive-epsf ncurses-devel
+RUN yum -y groupinstall \
+    'Development tools' && \
+    yum -y install \
+    git \
+    ncurses-devel \
+    latex2html \
+    texlive-epsf
 
 # build with icmake
 RUN mkdir /src
