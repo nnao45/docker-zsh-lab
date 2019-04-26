@@ -1,0 +1,22 @@
+#include "media.h"
+
+#include <string.h>
+#include <stdlib.h>
+
+#include "../message/message.h"
+#include "../file/file.h"
+
+                                                /* media_get() was read   */
+                                                /* from file rather than    */
+                                                /* its internal buffer      */
+static inline FILE *m_file(register Media *mp)
+{
+    return mp->d_file;
+}
+                                                /* to a file. returnss and  */
+                                                /* sets the d_offset field  */
+static inline long m_set_offset(register Media *mp)
+{
+    return mp->d_offset = ftell(m_file(mp));
+}
+

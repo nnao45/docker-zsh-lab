@@ -1,0 +1,11 @@
+void sfExit(string path)
+{
+    program("programs");
+    manualMayExit(path, 0);     // create the manual using the new progs
+
+    putenv("YODL_BIN=" + g_cwd + g_install + BIN);
+    run("yodl2html -o ../sf/index.html -I.:tmp/install/usr/share/yodl "
+                                                        "../sf/index.yo");
+    exit(0);
+}
+    

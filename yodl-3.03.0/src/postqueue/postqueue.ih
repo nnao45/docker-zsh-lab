@@ -1,0 +1,14 @@
+#include "postqueue.h"
+
+#include <stdlib.h>
+
+#include "../args/args.h"
+
+#define BLOCK_QUEUEINC          100
+
+void pq_append(long offset, HashItem *item,
+                            void (*d_handler)(long offset, HashItem *));
+
+
+
+
