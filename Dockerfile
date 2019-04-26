@@ -38,8 +38,8 @@ FROM centos:7.6.1810
 RUN yum -y install man
 ADD .zshrc /root
 COPY --from=builder /usr/local/bin/zsh /usr/local/bin/zsh
-COPY --from=builder /usr/local/lib/zsh/5.7.1-dev-0 /usr/local/lib/zsh/5.7.1-dev-0
-COPY --from=builder /usr/local/share/zsh/5.7.1-dev-0 /usr/local/share/zsh/5.7.1-dev-0
+COPY --from=builder /usr/local/lib/zsh /usr/local/lib/zsh
+COPY --from=builder /usr/local/share/zsh /usr/local/share/zsh
 COPY --from=builder /usr/local/share/man/man1 /usr/local/share/man/man1
 WORKDIR /root/
 CMD ["/usr/local/bin/zsh"]
