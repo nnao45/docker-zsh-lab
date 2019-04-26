@@ -37,7 +37,8 @@ RUN ./Util/preconfig && \
 COPY porg-0.10 /src/porg-0.10
 WORKDIR /src/porg-0.10
 RUN ./configure --prefix=/usr/local --disable-grop && \
-    make && make install
+    make && \
+    make install
 WORKDIR /src/zsh
 RUN porg -lD make install
 
