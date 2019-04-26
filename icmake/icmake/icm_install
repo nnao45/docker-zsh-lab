@@ -1,0 +1,104 @@
+#!/bin/bash
+
+usage()
+{
+    echo "
+Usage: $0 [strip] all|progs|scripts|man|skel|doc|etc|docdoc [installdir]
+"
+    exit 1
+}
+
+[ -e tmp/ROOT ] || usage
+
+. scripts/conversions
+
+echo ROOT DIRECTORY: ${ROOT}
+
+if [ "$1" == "strip" ] ; then
+    STRIP=strip
+    shift
+fi
+
+if [ "$2" != "" ] ; then
+    INSTALLDIR=$2
+else
+    INSTALLDIR=${ROOT}
+fi
+
+try()
+{
+    echo $*
+    $* || exit 1
+}
+
+progs()
+{
+    if [ "$STRIP" == "strip" ] ; then
+        try strip tmp/${BINDIR}/icmake tmp/${BINDIR}/icmun \
+                  tmp/${LIBDIR}/*
+    fi
+    try mkdir -p $INSTALLDIR/${BINDIR} $INSTALLDIR/${LIBDIR}
+
+    try cp -r tmp/${BINDIR}/icmake tmp/${BINDIR}/icmun $INSTALLDIR/${BINDIR}
+    try cp -r tmp/${LIBDIR}/* $INSTALLDIR/${LIBDIR}
+}
+
+scripts()
+{
+    try mkdir -p $INSTALLDIR/${BINDIR}
+
+      #                 script   install-dest. 
+    try scripts/convert icmbuild $INSTALLDIR/$BINDIR
+    try scripts/convert icmstart $INSTALLDIR/$BINDIR
+    try chmod +x $INSTALLDIR/$BINDIR/icmbuild $INSTALLDIR/$BINDIR/icmstart
+}
+
+into()
+{
+    try mkdir -p $INSTALLDIR/$1
+    try cp -r tmp/$1/* $INSTALLDIR/$1
+}
+
+case $1 in
+    (all)
+        progs
+        scripts
+        into ${MANDIR}
+        into ${SKELDIR}
+        into ${DOCDIR}
+        into ${DOCDOCDIR}
+        into ${CONFDIR}
+    ;;
+
+    (progs)
+        progs
+    ;;
+
+    (scripts)
+        scripts
+    ;;
+
+    (man)
+        into ${MANDIR}
+    ;;
+
+    (skel)
+        into ${SKELDIR}
+    ;;
+
+    (doc)
+        into ${DOCDIR}
+    ;;
+
+    (etc)
+        into ${CONFDIR}
+    ;;
+
+    (docdoc)
+        into ${DOCDOCDIR}
+    ;;
+
+    (*)
+        usage
+    ;;
+esac

@@ -1,0 +1,48 @@
+#!/usr/bin/icmake -qt /tmp/icmake-man
+
+void yodl(string dest, string src)
+{
+    system("yodl2man --no-warnings -o " + dest + " " + src);
+}
+
+string release = "release.yo";
+
+void rmrelease()
+{
+    echo(OFF);
+    system("rm -f " + release);
+    echo(ON);
+}
+
+void main(int argc, list argv)
+{
+    string version;
+    string versionFile;
+    list line;
+    list cut;
+    string key;
+    string value;
+    versionFile = "../../VERSION";
+
+    rmrelease();
+
+    while (sizeof(line = fgets(versionFile, (int)line[1])))
+    {
+        cut = strtok(line[0], "= \t\n");
+        key = cut[0];
+        value = cut[1];
+
+        if (key == "VERSION")
+            fprintf("release.yo", "SUBST(_CurVers_)(", value, ")\n");
+        else if (key == "YEARS")
+            fprintf("release.yo", "SUBST(_CurYrs_)(", value, ")\n");
+    }
+
+    yodl("../icmake.1", "icmake.yo");
+    yodl("../icmstart.1", "icmstart.yo");
+    yodl("../icmbuild.1", "icmbuild.yo");
+    yodl("../icmstart.rc.7", "icmstart.rc.yo");
+    yodl("../icmconf.7", "icmconf.yo");
+
+    rmrelease();
+}

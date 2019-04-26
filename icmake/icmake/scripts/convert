@@ -1,0 +1,18 @@
+#!/bin/bash
+
+SCRIPTNAME=$1
+DESTDIR=$2
+
+. scripts/conversions
+
+mkdir -p tmp/${DESTDIR}
+
+sed '
+s,@BINDIR@,'${BINDIR}',g
+s,@SKELDIR@,'${SKELDIR}',g
+s,@MANDIR@,'${MANDIR}',g
+s,@LIBDIR@,'${LIBDIR}',g
+s,@CONFDIR@,'${CONFDIR}',g
+s,@DOCDIR@,'${DOCDIR}',g
+s,@DOCDOCDIR@,'${DOCDOCDIR}',g
+' tmp/${SCRIPTNAME}.in > ${DESTDIR}/${SCRIPTNAME}

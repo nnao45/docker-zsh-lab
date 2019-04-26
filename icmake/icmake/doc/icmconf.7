@@ -1,0 +1,501 @@
+.TH "icmconf" "7" "1992\-2015" "icmake\&.7\&.22\&.01\&.tar\&.gz" "configuration file for \fBicmbuild\fP(1)"
+
+.PP 
+.SH "NAME"
+icmconf \- Configuration file for the \fBicmbuild\fP(1) 
+program maintenance script
+.PP 
+.SH "DESCRIPTION"
+
+.PP 
+The \fBicmconf\fP configuration file is used to specify and tailor the
+characteristics of program maintenance performed by the \fBicmbuild\fP(1) icmake
+script\&. It can be used to activate and specify various directives that
+determine how the program or library maintenance will proceed\&. 
+.PP 
+The directives are biased towards the construction of a \fBC++\fP program, but
+program maintenance for other languages (e\&.g\&., \fBC\fP) can easily be realized
+as well\&. 
+.PP 
+.SH "CLASS DEPENDENCIES"
+
+.PP 
+Traditional make\-utilities recompile sources once header files are
+modified\&. In the context of \fBC++\fP program development this is often a bad
+idea, as adding a new member to a class does not normally require you to
+recompile the class\(cq\&s sources\&. To handle class dependencies in a more sensible
+way, \fBicmake\fP(1)\(cq\&s \fICLASSES\fP file may define dependencies among classes\&. 
+.PP 
+If a class Y depends on class X as in:
+.nf 
+
+  class Y: public X
+    {
+        \&.\&.\&.
+    };
+        
+.fi 
+or as in:
+.nf 
+
+    class Y 
+    { 
+        X d_y; 
+        \&.\&.\&.
+    };
+        
+.fi 
+then the sources of class Y should be recompiled if X\(cq\&s data organization
+has changed\&. In cases like these Y depends on X\&. 
+.PP 
+Such class dependencies can be specified in the CLASSES file using the
+form: 
+.nf 
+
+  y   x
+    
+.fi 
+where x and y are the directories holding the respective class sources\&. Then,
+when altering X\(cq\&s data organization, do \(cq\&touch x/a\(cq\&, followed by \(cq\&icmbuild
+program\(cq\&: x\(cq\&s sources as well as the sources in directories (in)directly
+depending on x (e\&.g\&., y) are then automatically recompiled by icmbuild\&.
+.PP 
+Multiple dependencies can also be specified\&. If the class
+organization looks like this:
+.nf 
+
+    class Z: public Y
+    {
+        X d_x;
+    };
+        
+.fi 
+then Z depends on both Y and X\&. In the CLASSES file this may be indicated
+by the line
+.nf 
+
+    z   x   y
+        
+.fi 
+Indirect dependencies are automatically followed\&. After changing X\(cq\&s data
+organization where CLASSES contains the lines
+.nf 
+
+    x
+    y   x
+    z   y
+        
+.fi 
+then \(cq\&icmbuild program\(cq\& results in recompiling all of the sources in
+classes x, y and z\&.
+.PP 
+By default, class\-dependencies are not interpreted\&. To activate them the line
+.nf 
+
+//#define USE_ALL             \(dq\&a\(dq\&
+    
+.fi 
+in the \fIicmconf\fP file must be uncommented:
+.nf 
+
+#define USE_ALL             \(dq\&a\(dq\&
+    
+.fi 
+
+.PP 
+Empty lines and lines whose first non\-blank character is a hash\-mark (\fI#\fP)
+or whose first non\-blank characters are two consecutive forward slashes (//)
+are ignored\&. Long lines can be split over multiple lines by using a final
+backslash character at lines which continue at the next line\&. E\&.g\&.,
+.nf 
+
+    name1 depends on     multiple other classes
+        
+.fi 
+
+.PP 
+.SH "ICMCONF PARAMETERS"
+.IP o 
+\fB#define ADD_LIBRARIES       \(dq\&\(dq\&\fP
+.br 
+When a program must be linked against additional libraries (other than
+the name of the program\(cq\&s library itself, if specified at \fILIBRARY\fP)
+then those libraries should be specified, blank space separated,
+here\&. E\&.g\&., when a program is linked against \fIlibbobcat\fP then the
+specification is:
+.nf 
+
+    #define ADD_LIBRARIES   \(dq\&bobcat\(dq\&
+    
+.fi 
+
+.IP 
+.IP o 
+\fB#define ADD_LIBRARY_PATHS  \(dq\&\(dq\&\fP
+.br 
+When the additional libraries (specified at \fIADD_LIBRARIES\fP) are
+located in non\-standard library locations (e\&.g\&., not in \fI/lib\fP and
+\fI/usr/lib\fP) then these additional paths are (blank space separated)
+specified here\&. Specify only the paths, not the \fI\-L\fP flags\&.
+.IP 
+.IP o 
+\fB#define CLS\fP
+.br 
+The \fIclear screen\fP directive\&. If defined \fItput clear\fP is called to
+clear the terminal screen before starting the compilation\&. By default
+it is not defined\&.
+.IP 
+.IP o 
+\fB#define CXX                 \(dq\&g++\(dq\&\fP
+.br 
+The C++ compiler to use\&. For a \fBC\fP compiler use, e\&.g\&., \fI#define CC
+\(dq\&gcc\(dq\&\fP\&. Its setting is overruled by an identically named environment
+variable\&.
+.IP 
+.IP o 
+\fB#define CXXFLAGS            \(dq\&\-\-std=c++0x \-Wall \-g \-O2\(dq\&\fP
+.br 
+The compiler options to use\&. The default options are shown\&. When the
+\fBC\fP compiler is used, use \fI#define CFLAGS\fP rather than
+\fICXXFLAGS\fP\&. Its setting is overruled by an identically named
+environment variable\&.
+.IP 
+.IP o 
+\fB#define DEFCOM  \(dq\&\&.\&.\&.\(dq\&\fP
+.br 
+A \fIDEFCOM\fP directive may be added to the \fIicmconf\fP file by
+\fIicmstart\fP\&. It may be defined as:
+.nf 
+
+    #define DEFCOM  \(dq\&program\(dq\&
+        
+.fi 
+in which case \fIicmbuild\fP will do program maintenance\&. Alternatively
+it may be defined as: 
+.nf 
+
+    #define DEFCOM  \(dq\&program strip\(dq\&
+        
+.fi 
+in which case \fIicmbuild\fP will do program maintenance, creating a
+stripped binary program\&. It may also be defined as
+.nf 
+
+    #define DEFCOM  \(dq\&library\(dq\&
+       
+.fi 
+in which case \fIicmbuild\fP will de library maintenance\&. 
+.IP 
+If this directive was not added by \fBicmstart\fP(1) it can always be
+added to \fIicmconf\fP by hand\&.
+.IP 
+.IP o 
+\fB#define LDFLAGS             \(dq\&\(dq\&\fP
+.br 
+The linker options to use\&. By default no options are passed to the
+linker\&. Its setting is overruled by an identically named environment
+variable\&.
+.IP 
+.IP o 
+\fB#define LIBRARY           \(dq\&modules\(dq\&\fP
+.br 
+By default this directive is not defined\&. If defined a local library is
+constructed\&. When a binary program is built it will be linked against
+this library rather than to the individual object modules\&. 
+.IP 
+If a library construction is intended (see also the \fIDEFCOM\fP
+directive), then the \fILIBRARY\fP directive defines the base name
+(without the \fIlib\fP prefix and without the \fI\&.a\fP extension) of the
+library to be constructed\&. 
+.IP 
+After a library construction \fIinstall static dir\fP installs the static
+library at \fIdir\fP, which \fIinstall shared dir\fP installs the shared
+library (see below at \fI#define SHARED\fP) at \fIdir\fP\&.
+.IP 
+.IP o 
+\fB#define MAIN                \(dq\&main\&.cc\(dq\&\fP
+.br 
+The source file defining the \fIint main\fP function\&. This specification
+may be left as\-is or may completely be removed if \fBicmbuild\fP(1) is
+used for library maintenance rather than program maintenance\&.
+.IP 
+.IP o 
+\fB#define OBJ_EXT             \(dq\&\&.o\(dq\&\fP
+.br 
+The extension of object modules created by the compiler\&.
+.IP 
+.IP o 
+\fB#define PARSER_DIR          \(dq\&\(dq\&\fP
+.br 
+The subdirectory containing the parser\(cq\&s specification file\&. Leave
+empty if no parser class is used and if no parser is generated\&. 
+The following directives, beginning with \fIPARS\fP, are only
+interpreted when \fIPARSER_DIR\fP is defined as a non\-empty string\&.
+.IP 
+.IP o 
+\fB#define PARSFILES           \(dq\&\(dq\&\fP
+.br 
+If the parser specification file named at \fIPARSSPEC\fP itself includes
+additional specification files, then patterns matching these
+additional grammar specification files should be specified here\&. The
+pattern is interpreted in the directory specified at \fIPARSER_DIR\fP
+and could contain a subdirectory name (e\&.g\&. \fIspecs/*\fP)\&. When files
+matching the pattern are modified then a new parser will be
+created\&. By default no additional specification files are used\&.
+.IP 
+.IP o 
+\fB#define PARSFLAGS           \(dq\&\-V\(dq\&\fP
+.br 
+The flags to use when calling the program specified at \fIPARSGEN\fP\&.
+.IP 
+.IP o 
+\fB#define PARSGEN             \(dq\&bisonc++\(dq\&\fP
+.br 
+The name of the program generating the parser\&.
+.IP 
+.IP o 
+\fB#define PARSOUT             \(dq\&parse\&.cc\(dq\&\fP
+.br 
+The name of the file generated by the parser generator (which is used
+by \fIicmbuild\fP to compare the timestamps of the parser specification
+\fBs\fP against)\&.
+.IP 
+.IP o 
+\fB#define PARSSPEC            \(dq\&grammar\(dq\&\fP
+.br 
+The name of the parser specification file\&. This file is
+expected in the directory specified at \fIPARSER_DIR\fP\&.
+.IP 
+.IP o 
+\fB#define REFRESH\fP
+.br 
+Define \fIREFRESH\fP to relink the binary program at every \fIicmbuild
+program\fP call\&. By default \fIREFRESH\fP is \fInot\fP defined\&.
+.IP 
+.IP o 
+\fB#define SCANNER_DIR         \(dq\&\(dq\&\fP
+.br 
+The subdirectory containing the scanner\(cq\&s specification file\&. Leave
+empty if no scanner class is used and if no lexical scanner is
+generated\&. The following directives, beginning with \fISCAN\fP, are only
+interpreted when \fISCANNER_DIR\fP is defined as a non\-empty string\&.
+.IP 
+.IP o 
+\fB#define SCANFILES            \(dq\&\(dq\&\fP
+.br 
+If the lexical scanner specification file named at \fISCANSPEC\fP itself
+includes additional specification files, then patterns matching these
+additional lexer specification files should be specified here\&. The
+pattern is interpreted in the directory specified at \fISCANNER_DIR\fP
+and could contain a subdirectory name (e\&.g\&. \fIspecs/*\fP)\&. When files
+matching the pattern are modified then a new lexical scanner will be
+created\&. By default no additional specification files are used\&.
+.IP 
+.IP o 
+\fB#define SCANFLAGS           \(dq\&\(dq\&\fP
+.br 
+The flags to use when calling the program specified at \fISCANGEN\fP\&.
+.IP 
+.IP o 
+\fB#define SCANGEN             \(dq\&flexc++\(dq\&\fP
+.br 
+The name of the program generating the lexical scanner\&.
+.IP 
+.IP o 
+\fB#define SCANOUT             \(dq\&lex\&.cc\(dq\&\fP
+.br 
+The name of the file generated by the lexical scanner (which is used by
+\fIicmbuild\fP to compare the timestamps of the scanner specification
+\fBs\fP against)\&.
+.IP 
+.IP o 
+\fB#define SCANSPEC            \(dq\&lexer\(dq\&\fP
+.br 
+The name of the lexical scanner specification file\&. This file is
+expected in the directory specified at \fISCANNER_DIR\fP\&.
+.IP 
+.IP o 
+\fB#define SHARED\fP
+.br 
+This directive is only interpreted if \fILIBRARY\fP was also specified\&.
+If defined a static library (extension \fI\&.a\fP) as well as a shared
+library (extension \fI\&.so*\fP) is built\&. If not specified, but
+\fILIBRARY\fP was specified, only the static library is built\&. By
+default \fISHARED\fP is not defined\&.
+.IP 
+The shared library receives as its major version number \fIVERSION\fP\(cq\&s
+major version number, and receives \fIVERSION\fP as its full version
+number\&. E\&.g\&., if \fIVERSION\fP is defined as \fI1\&.02\&.03\fP and \fILIBRARY\fP
+is defined as \fIdemo\fP then the shared library \fIlibdemo\&.so\&.1\&.02\&.03\fP
+is constructed, with \fIlibdemo\&.so\&.1\fP soft\-linking to it, with
+\fIlibdemo\&.so\fP in turn soft\-linking to \fIlibdemo\&.so\&.1\fP\&.
+.IP 
+.IP o 
+\fB#define SHAREDREQ           \(dq\&\(dq\&\fP
+.br 
+When creating a shared library \fISHAREDREQ\fP specifies the names of
+libraries and library paths that are required by the shared library\&.
+E\&.g\&., if a library is found in \fI/usr/lib/special\fP, assuming that the
+name of the required library is \fIlibspecial\&.so\fP, then use the
+specification \fI\(dq\&\-L/usr/lib/special \-lspecial\(dq\&\fP\&.  The \fI/lib\fP and
+\fI/usr/lib\fP paths are usually predefined and need not be
+specified\&. This directive is only interpreted if \fISHARED\fP and
+\fILIBRARY\fP were also defined\&.
+.IP 
+.IP o 
+\fB#define SOURCES             \(dq\&*\&.cc\(dq\&\fP
+.br 
+The pattern to locate sources in a directory\&. The default value is
+shown\&. 
+.IP 
+.IP o 
+\fB#define TMP_DIR             \(dq\&tmp\(dq\&\fP
+.br 
+The directory in which intermediate results are stored\&. Relative to the
+current working directory unless an absolute path is specified\&.
+.IP 
+.IP o 
+\fB#define USE_ALL     \(dq\&a\(dq\&\fP
+.br 
+After defining this directive (by default it is \fInot\fP defined) a
+class dependency setup defined in the CLASSES file is interpreted\&. In
+this case, when a directory contains a file named at the \fIUSE_ALL\fP
+directive, then all sources of that class as well as all sources of
+all classes depending on it are (re)compiled\&. The program\(cq\&s root
+directory is assumed to depend on all other directories\&.
+.IP 
+Class dependencies in CLASSES consist of the class name (as the first
+word on a line) optionally followed by additional class names, which
+are the classes on which the line\(cq\&s first class name depends\&. 
+.IP 
+Assuming that a program uses five classes \fIOne, Two, Three, Four\fP and
+\fIFive\fP and that class \fIThree\fP depends on class \fITwo\fP, which in
+turn depends on class \fIOne\fP, while class \fIFive\fP depends on
+\fIThree\fP and \fIFour\fP, then the file \fICLASSES\fP may reflect these
+dependencies as follows: 
+.nf 
+
+    one
+    two     one
+    three   two
+    four
+    five three four 
+.fi 
+Now touching (creating) the file \fItwo/a\fP (using e\&.g\&., the command
+\fItouch two/a\fP) causes all sources of the classes \fITwo, Three\fP and \fIFive\fP
+as well as all the sources in the program\(cq\&s root directory to be recompiled:
+\fITwo\fP is recompiled because of the existence of \fItwo/a\fP, \fIThree\fP is
+recompiled because it depends on \fITwo\fP, \fIFive\fP is recompiled because it
+depends on \fIThree\fP, the sources in the program\(cq\&s root directory are
+recompiled because at least one directory is recompiled\&.
+.IP 
+This facility was added to the \fIicmbuild\fP script because \fBC++\fP header
+files are often modified \fIwithout\fP the need to recompile all their depending
+sources\&. No recompilation is necessary when a new class member function is
+declared\&. Recompilation, however, \fIis\fP necessary when the class\(cq\&s internal
+organization changes, e\&.g\&., when the organization of its data members is
+modified\&. Simply touching a file \fI\(dq\&a\(dq\&\fP is sufficient to perform 
+the necessary recompilations\&.
+.IP 
+Following the recompilations the \fIUSE_ALL\fP \fBs\fP are removed\&.  
+.IP 
+When the \fIUSE_ALL\fP directive was defined the command \fIicmbuild
+clean\fP also removes any leftover \fIUSE_ALL\fP files from the program\(cq\&s direct
+subdirectories\&.
+.IP 
+.IP o 
+\fB#define USE_ECHO              ON\fP
+.br 
+When specified as \fION\fP (rather than \fIOFF\fP) commands executed by
+\fIicmbuild\fP are echoed\&.
+.IP 
+.IP o 
+\fB#define USE_VERSION\fP
+.br 
+If defined (which is the default) the file \fIVERSION\fP is read by
+\fIicmconf\fP to determine the program/library\(cq\&s version, and the
+project\(cq\&s release years\&.
+
+.PP 
+.SH "OBSOLETE DIRECTIVES"
+.IP o 
+\fBBINARY \(dq\&\(dq\&\fP
+.br 
+This \fI#define\fP may safely be removed from older \fIicmconf\fP files as
+it is no longer used by \fIicmbuild\fP\&. When a binary program is
+constructed it is created as \fITMP_DIR \(dq\&/bin/binary\(dq\&\fP, while
+\fIinstall program path\fP installs the binary program at \fIpath\fP\&.
+.IP 
+.IP o 
+\fBBIN_INSTALL\fP
+.br 
+This \fI#define\fP may safely be removed from older \fIicmconf\fP files as
+it is no longer used by \fIicmbuild\fP\&. See \fI#define BINARY\fP for
+details about how to install a binary program
+.IP 
+.IP o 
+\fB#define COMPILER            \(dq\&\(dq\&\fP
+.br 
+This \fI#define\fP should be replaced by \fICXX\fP or \fICC\fP\&.
+.IP 
+.IP o 
+\fB#define COMPILER_OPTIONS    \(dq\&\(dq\&\fP
+.br 
+This \fI#define\fP should be replaced by \fICXXFLAGS\fP or \fICFLAGS\fP\&.
+.IP 
+.IP o 
+\fBLIB_INSTALL\fP
+.br 
+This \fI#define\fP may safely be removed from older \fIicmconf\fP files as
+it is no longer used by \fIicmbuild\fP\&. See \fI#define LIBRARY\fP for
+details about how to install libraries\&.
+.IP 
+.IP o 
+\fB#define LINKER_OPTIONS      \(dq\&\(dq\&\fP
+.br 
+This \fI#define\fP should be replaced by \fILDFLAGS\fP\&.
+
+.PP 
+.SH "FILES"
+The mentioned paths are sugestive only and may be installation dependent:
+.IP o 
+\fB/usr/share/icmake/CLASSES\fP
+.br 
+Example of an \fBicmconf\fP \fICLASSES\fP file\&.
+.IP o 
+\fB/usr/share/icmake/icmconf\fP
+.br 
+Default skeleton \fBicmbuild\fP resource file\&.
+.IP o 
+\fB/etc/icmake\fP
+.br 
+Directory containing the default system\-wide \fBicmake\fP(1)
+configuration files (like \fIVERSION\fP and \fIicmstart\&.rc\fP)
+.IP o 
+\fB$HOME/\&.icmake\fP
+.br 
+Optional directory containing user\-defined specifications overruling
+the system\-wide definitions\&. This directory is the proper location for
+a file \fIAUTHOR\fP defining the \fIAUTHOR\fP directive with the user\(cq\&s
+name\&. E\&.g\&., my \fI\&.icmake/AUTHOR\fP file contains:
+.IP 
+.nf 
+#define AUTHOR  \(dq\&Frank B\&. Brokken (f\&.b\&.brokken@rug\&.nl)\(dq\&;
+
+.fi 
+
+.IP 
+.SH "SEE ALSO"
+\fBicmake\fP(1), \fBicmbuild\fP(1), \fBicmstart\fP(1), \fBicmstart\&.rc\fP(7)\&.
+.PP 
+.SH "BUGS"
+The interpretation of the class dependencies (see section \fBCOMPILING AND
+LINKING\fP has altered when \fIicmake\fP was updated to version 7\&.16\&.00\&. 
+.PP 
+.SH "COPYRIGHT"
+This is free software, distributed under the terms of the 
+GNU General Public License (GPL)\&.
+.PP 
+.SH "AUTHOR"
+Frank B\&. Brokken (\fBf\&.b\&.brokken@rug\&.nl\fP)\&.
+.PP 

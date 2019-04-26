@@ -1,0 +1,9 @@
+%filenames scanner
+
+//%interactive
+//%debug
+
+%%
+
+[ \t]+                          // Often used: skip white space
+\n                              // same

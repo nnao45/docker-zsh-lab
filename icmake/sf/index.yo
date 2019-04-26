@@ -1,0 +1,37 @@
+htmlbodyopt(text)(#27408B)
+htmlbodyopt(bgcolor)(#FFFAF0)
+
+mailto(f.b.brokken@rug.nl)
+SUBST(_project_)(icmake)
+SUBST(_Project_)(Icmake)
+
+affiliation(Center for Information Technology, University of Groningen)
+
+notableofcontents()
+
+report(_Project_)
+      (Frank B. Brokken (f.b.brokken@rug.nl))
+      (2015)
+
+The _Project_ project has moved to 
+    lurl(https://fbb-git.github.io/_project_/) and
+is no longer maintained at Sourceforge. 
+
+Please refer to
+    lurl(https://fbb-git.github.io/_project_/) 
+and the archive at
+    lurl(https://github.com/fbb-git/_project_) 
+for the latest archive and new releases. 
+
+htmlcommand(
+<a href="https://github.com/fbb-git/_project_"><img
+src="http://sflogo.sourceforge.net/sflogo.php?group_id=259636&type=8"
+width="80" height="15" border="0" 
+alt="Get _Project_ from https://fbb-git.github.io/_project_/" /></a>
+  )
+
+Contact the author at url(his e-mail address)(mailto:f.b.brokken@rug.nl)
+
+
+
+
